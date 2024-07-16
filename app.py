@@ -133,17 +133,25 @@ def fetch_bills():
             driver.get_screenshot_as_file("screenshot2.png")
 
             # Iterate and store a column of urls
-            urls = []
+            results = []   
             for i in range(1,6):
                 # print(f"Storing the URLs: iteration {i}...")
                 # Extract the URL from the button
+
                 try:
                     button_element = WebDriverWait(driver, 30).until(
                         EC.presence_of_element_located((By.XPATH, f'//*[@id="main"]/div/div/section/div[3]/div[1]/table/tbody/tr[{i}]/td[1]/div/a'))
                     )
                     button_url = button_element.get_attribute('href') 
+
+                    smart_scraper_graph = SmartScraperGraph(
+                    prompt="Tell me the name, status, last updated, and summary of the bill.",
+                    source=button_url,
+                    config=graph_config
+                    )
+
                     # print(f"Extracted URL: {button_url}")
-                    urls.append(button_url)
+                    results.append(smart_scraper_graph.run())
                 except TimeoutException:
                     print("Button URL not found. Printing page source for debugging.")
                     print(driver.page_source)
@@ -153,16 +161,16 @@ def fetch_bills():
             # for url in urls:
             #     print(url)
             # Use ScrapeGraphAI to scrape data from individual urls    
-            results = []   
-            for url in urls:
-                # print(url)    
-                smart_scraper_graph = SmartScraperGraph(
-                    prompt="Tell me the name, status, last updated, and summary of the bill.",
-                    source=url,
-                    config=graph_config
-                )
-                # print("Running smartscrapergraph")
-                results.append(smart_scraper_graph.run())
+            # results = []   
+            # for url in urls:
+            #     # print(url)    
+            #     smart_scraper_graph = SmartScraperGraph(
+            #         prompt="Tell me the name, status, last updated, and summary of the bill.",
+            #         source=url,
+            #         config=graph_config
+            #     )
+            #     # print("Running smartscrapergraph")
+            #     results.append(smart_scraper_graph.run())
 
                 # execution info
                 # graph_exec_info = smart_scraper_graph.get_execution_info()
