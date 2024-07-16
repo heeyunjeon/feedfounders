@@ -1,0 +1,23 @@
+django>=5.0,<5.1
+dj-database-url>=2,<3
+faiss-cpu==1.7.4
+Flask>=2.2.5
+Flask-Caching==1.10.1
+Flask-SQLAlchemy>=3.0.2
+Flask-Mail==0.9.1
+gunicorn>=22,<23
+python-dotenv==1.0.1
+redis>=3
+rq>=0.13
+scrapegraphai==0.1.0
+selenium==3.141.0
+SWIG==4.1.1
+whitenoise[brotli]>=6,<7
+Werkzeug==2.2.2
+# Uncomment these lines to use a Postgres database. Both are needed, since in production
+# (which uses Linux) we want to install from source, so that security updates from the
+# underlying Heroku stack image are picked up automatically, thanks to dynamic linking.
+# On other platforms/in development, the precompiled binary package is used instead, to
+# speed up installation and avoid errors from missing libraries/headers.
+#psycopg[c]; sys_platform == "linux"
+#psycopg[binary]; sys_platform != "linux"
