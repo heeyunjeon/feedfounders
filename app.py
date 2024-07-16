@@ -162,25 +162,25 @@ def fetch_bills():
                     config=graph_config
                 )
                 # print("Running smartscrapergraph")
-                result = smart_scraper_graph.run()
+                results.append(smart_scraper_graph.run())
 
                 # execution info
-                graph_exec_info = smart_scraper_graph.get_execution_info()
+                # graph_exec_info = smart_scraper_graph.get_execution_info()
                 # print(prettify_exec_info(graph_exec_info))
 
                 # Debugging: Print the entire response
                 # print(json.dumps(result, indent=4))
 
                 # Check if the result contains the expected data
-                if 'name' not in result or 'status' not in result or 'last_updated' not in result or 'summary' not in result:
-                    raise KeyError("One of the expected keys ('name', 'status', 'last_updated', 'summary') was not found in the response.")    
+                # if 'name' not in result or 'status' not in result or 'last_updated' not in result or 'summary' not in result:
+                #     raise KeyError("One of the expected keys ('name', 'status', 'last_updated', 'summary') was not found in the response.")    
             
-                results.append({
-                    "name": result['name'],
-                    "status": result['status'],
-                    "last_updated": result['last_updated'],
-                    "summary": result['summary']
-                })
+                # results.append({
+                #     "name": result['name'],
+                #     "status": result['status'],
+                #     "last_updated": result['last_updated'],
+                #     "summary": result['summary']
+                # })
 
         finally:
             # Close the WebDriver
