@@ -64,7 +64,7 @@ graph_config = {
 bills = None
 
 # Fetch bills from the TechPolicy Press website
-@cache.cached(timeout=3600)
+# @cache.cached(timeout=3600)
 def fetch_bills():
     with app.app_context():
         driver = None
