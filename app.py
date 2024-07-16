@@ -100,21 +100,20 @@ def fetch_bills():
 
             # Function to click an element with retry on StaleElementReferenceException
             def click(xpath):
-                for _ in range(3):  # Retry up to 3 times
-                    try:
-                        element = WebDriverWait(driver, 20).until(
-                            EC.element_to_be_clickable((By.XPATH, xpath))  
-                        ) 
-                        driver.execute_script("arguments[0].scrollIntoView(true);", element)
-                        element.click()
-                        return element
-                    except StaleElementReferenceException:
-                        print(f"StaleElementReferenceException: {xpath}")
-                    except TimeoutException:
-                        print(f"TimeoutException: {xpath}")
-                        print(driver.page_source)
-                        driver.quit()
-                        raise
+                try:
+                    element = WebDriverWait(driver, 20).until(
+                        EC.element_to_be_clickable((By.XPATH, xpath))  
+                    ) 
+                    driver.execute_script("arguments[0].scrollIntoView(true);", element)
+                    element.click()
+                    return element
+                except StaleElementReferenceException:
+                    print(f"StaleElementReferenceException: {xpath}")
+                except TimeoutException:
+                    print(f"TimeoutException: {xpath}")
+                    print(driver.page_source)
+                    driver.quit()
+                    raise
                 
             # Click the first button - "topics" 
             # print("Clicking first filter element...")
