@@ -57,7 +57,7 @@ graph_config = {
       "model": "gpt-3.5-turbo",
    },
     "verbose": True,
-    "headless": False,
+    "headless": True,
 }
 
 # Initialize fetched bills as global variable 
@@ -69,13 +69,19 @@ def fetch_bills():
     with app.app_context():
         driver = None
         try:
+            chrome_options = webdriver.ChromeOptions()
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-gpu")
+            driver = webdriver.Chrome(options=chrome_options)
             # Path to your LOCAL WebDriver executable 
-            CHROMEDRIVER_PATH = "/Users/lsat/.cursor-tutor/projects/feedfounder/feedfounders/bin/chromedriver" 
+            # CHROMEDRIVER_PATH = "/Users/lsat/.cursor-tutor/projects/feedfounder/feedfounders/bin/chromedriver" 
             # GOOGLE_CHROME_BIN = "/Users/lsat/.cursor-tutor/projects/feedfounder/feedfounders/bin/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
-            service = Service(CHROMEDRIVER_PATH)
-            options = Options()
-            options.headless = False
-            driver = webdriver.Chrome(service=service, options=options)
+            # service = Service(CHROMEDRIVER_PATH)
+            # options = Options()
+            # options.headless = True
+            # driver = webdriver.Chrome(service=service, options=options)
+
             # # Uncomment to use Heroku
             # CHROMEDRIVER_PATH = "/app/.chrome-for-testing/chromedriver-linux64/chromedriver" 
             # GOOGLE_CHROME_BIN = "/app/.chrome-for-testing/chrome-linux64/chrome"
