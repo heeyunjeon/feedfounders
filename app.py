@@ -117,17 +117,17 @@ def fetch_bills():
                         raise
                 
             # Click the first button - "topics" 
-            print("Clicking first filter element...")
+            # print("Clicking first filter element...")
             click('//*[@id="topics-button"]') 
-            print("First filter element clicked.")
+            # print("First filter element clicked.")
             
             # Debug screenshot if first button is clicked as expected
             driver.get_screenshot_as_file("screenshot1.png")
 
             # Click the second button - "aritificial intelligence"
-            print("Clicking second filter element...")
+            # print("Clicking second filter element...")
             click('//*[@id="topics-menu"]/div[3]/ul/li[3]')  
-            print("Second filter element clicked.")
+            # print("Second filter element clicked.")
 
             # Debug screenshot if second button is clicked as expected
             driver.get_screenshot_as_file("screenshot2.png")
@@ -135,14 +135,14 @@ def fetch_bills():
             # Iterate and store a column of urls
             urls = []
             for i in range(1,6):
-                print(f"Storing the URLs: iteration {i}...")
+                # print(f"Storing the URLs: iteration {i}...")
                 # Extract the URL from the button
                 try:
                     button_element = WebDriverWait(driver, 30).until(
                         EC.presence_of_element_located((By.XPATH, f'//*[@id="main"]/div/div/section/div[3]/div[1]/table/tbody/tr[{i}]/td[1]/div/a'))
                     )
                     button_url = button_element.get_attribute('href') 
-                    print(f"Extracted URL: {button_url}")
+                    # print(f"Extracted URL: {button_url}")
                     urls.append(button_url)
                 except TimeoutException:
                     print("Button URL not found. Printing page source for debugging.")
@@ -150,26 +150,26 @@ def fetch_bills():
                     driver.quit()
                     raise
 
-            for url in urls:
-                print(url)
+            # for url in urls:
+            #     print(url)
             # Use ScrapeGraphAI to scrape data from individual urls    
             results = []   
             for url in urls:
-                print(url)    
+                # print(url)    
                 smart_scraper_graph = SmartScraperGraph(
                     prompt="Tell me the name, status, last updated, and summary of the bill.",
                     source=url,
                     config=graph_config
                 )
-                print("Running smartscrapergraph")
+                # print("Running smartscrapergraph")
                 result = smart_scraper_graph.run()
 
                 # execution info
                 graph_exec_info = smart_scraper_graph.get_execution_info()
-                print(prettify_exec_info(graph_exec_info))
+                # print(prettify_exec_info(graph_exec_info))
 
                 # Debugging: Print the entire response
-                print(json.dumps(result, indent=4))
+                # print(json.dumps(result, indent=4))
 
                 # Check if the result contains the expected data
                 if 'name' not in result or 'status' not in result or 'last_updated' not in result or 'summary' not in result:
