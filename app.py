@@ -73,6 +73,7 @@ def fetch_bills():
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--window-size=1189,813")
             driver = webdriver.Chrome(options=chrome_options)
             # Path to your LOCAL WebDriver executable 
             # CHROMEDRIVER_PATH = "/Users/lsat/.cursor-tutor/projects/feedfounder/feedfounders/bin/chromedriver" 
