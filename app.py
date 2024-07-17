@@ -151,6 +151,7 @@ def fetch_bills():
                     response = requests.get(button_url)
                     soup = BeautifulSoup(response.text, 'html.parser')
                     content = soup.get_text().replace("\n", "")
+                    name = soup.title.string
                 
                     # Summarize
                     client = OpenAI(
@@ -173,7 +174,7 @@ def fetch_bills():
 
                     # print(f"Extracted URL: {button_url}")
                     # results.append(smart_scraper_graph.run())
-                    results.append({"summary": completion.choices[0].message.content.strip()})
+                    results.append({"name": name, "summary": completion.choices[0].message.content.strip()})
 
                 except TimeoutException:
                     print("Button URL not found. Printing page source for debugging.")
