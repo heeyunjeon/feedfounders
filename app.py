@@ -16,6 +16,10 @@ from datetime import datetime
 import os
 import json
 
+import requests
+from bs4 import BeautifulSoup
+from openai import OpenAI
+
 # Load environment variables
 load_dotenv()  
 
@@ -143,14 +147,34 @@ def fetch_bills():
                     )
                     button_url = button_element.get_attribute('href') 
 
-                    smart_scraper_graph = SmartScraperGraph(
-                    prompt="Tell me the name, status, last updated, and summary of the bill.",
-                    source=button_url,
-                    config=graph_config
+                    #  Use BeautifulSoup
+                    response = requests.get(button_url)
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    content = soup.get_text().replace("\n", "")
+                
+                    # Summarize
+                    client = OpenAI(
+                        api_key=os.environ.get("OPENAI_API_KEY")
                     )
 
+                    completion = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": "You are an expert at summarizing, and identifying key points in text."},
+                            {"role": "user", "content": "Summarize this text: ''' {} ''', making sure to capture only the key points and using only 3 sentences.".format(content)}
+                        ]
+                    )
+
+                    # smart_scraper_graph = SmartScraperGraph(
+                    # prompt="Tell me the name, status, last updated, and summary of the bill.",
+                    # source=button_url,
+                    # config=graph_config
+                    # )
+
                     # print(f"Extracted URL: {button_url}")
-                    results.append(smart_scraper_graph.run())
+                    # results.append(smart_scraper_graph.run())
+                    results.append(completion.choices[0].message.content.strip())
+
                 except TimeoutException:
                     print("Button URL not found. Printing page source for debugging.")
                     print(driver.page_source)
