@@ -173,7 +173,7 @@ def fetch_bills():
 
                     # print(f"Extracted URL: {button_url}")
                     # results.append(smart_scraper_graph.run())
-                    results.append(completion.choices[0].message.content.strip())
+                    results.append({"summary": completion.choices[0].message.content.strip()})
 
                 except TimeoutException:
                     print("Button URL not found. Printing page source for debugging.")
