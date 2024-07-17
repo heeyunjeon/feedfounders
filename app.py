@@ -151,7 +151,8 @@ def fetch_bills():
                     response = requests.get(button_url)
                     soup = BeautifulSoup(response.text, 'html.parser')
                     content = soup.get_text().replace("\n", "")
-                    name = soup.title.string
+                    fullname = soup.title.string
+                    name = fullname.split("|")[0].strip()
                 
                     # Summarize
                     client = OpenAI(
