@@ -101,7 +101,7 @@ def fetch_bills():
             # Function to click an element with retry on StaleElementReferenceException
             def click(xpath):
                 try:
-                    element = WebDriverWait(driver, 10).until(
+                    element = WebDriverWait(driver, 5).until(
                         EC.element_to_be_clickable((By.XPATH, xpath))  
                     ) 
                     driver.execute_script("arguments[0].scrollIntoView(true);", element)
@@ -138,7 +138,7 @@ def fetch_bills():
                 # Extract the URL from the button
 
                 try:
-                    button_element = WebDriverWait(driver, 10).until(
+                    button_element = WebDriverWait(driver, 5).until(
                         EC.presence_of_element_located((By.XPATH, f'//*[@id="main"]/div/div/section/div[3]/div[1]/table/tbody/tr[{i}]/td[1]/div/a'))
                     )
                     button_url = button_element.get_attribute('href') 
