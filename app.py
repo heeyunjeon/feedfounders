@@ -201,7 +201,7 @@ def fetch_bills():
 def send_email(email, current_year):
     with app.app_context():
         # Get the bills from the database
-        retrieved_bills = Bill.query.all()
+        retrieved_bills = Bill.query.limit(5).all()
         newsletter_content = render_template('index.html', bills=retrieved_bills, current_year=current_year)
 
     # Create the email message
@@ -219,7 +219,7 @@ def send_email(email, current_year):
 def index():
 
     with app.app_context():
-        retrieved_bills = Bill.query.all()
+        retrieved_bills = Bill.query.limit(5).all()
 
         current_year = datetime.now().year
         return render_template('index.html', bills=retrieved_bills, current_year=current_year)
@@ -228,7 +228,6 @@ def index():
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
     email = request.form.get('email')
-    retrieved_bills = Bill.query.all()
 
     if email: 
         # Save the email to the database
@@ -239,7 +238,7 @@ def subscribe():
 
         # Send email with newsletter content
         current_year = datetime.now().year
-        send_email(email, retrieved_bills, current_year)
+        send_email(email, current_year)
 
         # redirect to a thank you page
         return redirect(url_for('thank_you'))
@@ -252,8 +251,8 @@ def thank_you():
 if __name__ == '__main__':
     # Create the database  
     with app.app_context():
-        db.create_all()
-
-    fetch_bills()
+        count = Bill.query.count()
+        if count == 0:
+            fetch_bills()
     
     app.run(debug=True)
