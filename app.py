@@ -3,25 +3,18 @@ from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
-# from scrapegraphai.graphs import SmartScraperGraph
-# from scrapegraphai.utils import prettify_exec_info
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from datetime import datetime
 import os
-import json
-from pydantic import BaseModel
 
 import requests
 from bs4 import BeautifulSoup
 from openai import OpenAI
-
-import pymongo 
 
 # Load environment variables
 load_dotenv()  
@@ -31,13 +24,9 @@ app = Flask(__name__)
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 cache.init_app(app)
 
-# Connect to MongoDB
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["mydatabase"]
-collection = db["bills"]
-
 # Configure the SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscriptions.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bills.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configure Flask-Mail
@@ -60,6 +49,16 @@ class Subscription(db.Model):
     # email = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), nullable=False)
 
+class Bill(db.Model):
+    __tablename__ = 'bills'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    summary = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f"Bill(id={self.id}, name={self.name}, summary={self.summary})"
+
 # OpenAI key for ScrapeGraphAI
 openai_key = os.getenv("OPENAI_APIKEY")
 
@@ -72,11 +71,7 @@ graph_config = {
     "headless": True,
 }
 
-# Initialize fetched bills as global variable 
-bills = None
-
 # Fetch bills from the TechPolicy Press website
-# @cache.cached(timeout=3600)
 def fetch_bills():
     with app.app_context():
         driver = None
@@ -133,7 +128,7 @@ def fetch_bills():
             # print("First filter element clicked.")
             
             # Debug screenshot if first button is clicked as expected
-            driver.get_screenshot_as_file("screenshot1.png")
+            # driver.get_screenshot_as_file("screenshot1.png")
 
             # Click the second button - "aritificial intelligence"
             # print("Clicking second filter element...")
@@ -141,10 +136,10 @@ def fetch_bills():
             # print("Second filter element clicked.")
 
             # Debug screenshot if second button is clicked as expected
-            driver.get_screenshot_as_file("screenshot2.png")
+            # driver.get_screenshot_as_file("screenshot2.png")
 
             # Iterate and store a column of urls
-            results = []   
+            # results = []   
             for i in range(1,6):
                 # print(f"Storing the URLs: iteration {i}...")
                 # Extract the URL from the button
@@ -183,7 +178,10 @@ def fetch_bills():
 
                     # print(f"Extracted URL: {button_url}")
                     # results.append(smart_scraper_graph.run())
-                    results.append({"name": name, "summary": completion.choices[0].message.content.strip()})
+                    bill = Bill(name=name, summary=completion.choices[0].message.content.strip())
+                    db.session.add(bill)
+                    
+                    # results.append({"name": name, "summary": completion.choices[0].message.content.strip()})
 
                 except TimeoutException:
                     print("Button URL not found. Printing page source for debugging.")
@@ -191,53 +189,20 @@ def fetch_bills():
                     driver.quit()
                     raise
 
-            # for url in urls:
-            #     print(url)
-            # Use ScrapeGraphAI to scrape data from individual urls    
-            # results = []   
-            # for url in urls:
-            #     # print(url)    
-            #     smart_scraper_graph = SmartScraperGraph(
-            #         prompt="Tell me the name, status, last updated, and summary of the bill.",
-            #         source=url,
-            #         config=graph_config
-            #     )
-            #     # print("Running smartscrapergraph")
-            #     results.append(smart_scraper_graph.run())
-
-                # execution info
-                # graph_exec_info = smart_scraper_graph.get_execution_info()
-                # print(prettify_exec_info(graph_exec_info))
-
-                # Debugging: Print the entire response
-                # print(json.dumps(result, indent=4))
-
-                # Check if the result contains the expected data
-                # if 'name' not in result or 'status' not in result or 'last_updated' not in result or 'summary' not in result:
-                #     raise KeyError("One of the expected keys ('name', 'status', 'last_updated', 'summary') was not found in the response.")    
-            
-                # results.append({
-                #     "name": result['name'],
-                #     "status": result['status'],
-                #     "last_updated": result['last_updated'],
-                #     "summary": result['summary']
-                # })
-
         finally:
             # Close the WebDriver
             if driver is not None:
                 driver.quit() 
         
         # Process and return the most recent policies
-        return results
+        db.session.commit()
 
-def store_bills():
-    bills = fetch_bills()   
-    collection.insert_many(bills)
 
-def send_email(email, bills, current_year):
+def send_email(email, current_year):
     with app.app_context():
-        newsletter_content = render_template('index.html', bills=bills, current_year=current_year)
+        # Get the bills from the database
+        retrieved_bills = Bill.query.all()
+        newsletter_content = render_template('index.html', bills=retrieved_bills, current_year=current_year)
 
     # Create the email message
     msg = Message('Thank you for subscribing!', 
@@ -254,10 +219,7 @@ def send_email(email, bills, current_year):
 def index():
 
     with app.app_context():
-        if collection.count_documents({}) == 0:
-            store_bills()
-
-        retrieved_bills = list(collection.find())
+        retrieved_bills = Bill.query.all()
 
         current_year = datetime.now().year
         return render_template('index.html', bills=retrieved_bills, current_year=current_year)
@@ -266,7 +228,7 @@ def index():
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
     email = request.form.get('email')
-    retrieved_bills = list(collection.find())
+    retrieved_bills = Bill.query.all()
 
     if email: 
         # Save the email to the database
@@ -291,4 +253,7 @@ if __name__ == '__main__':
     # Create the database  
     with app.app_context():
         db.create_all()
+
+    fetch_bills()
+    
     app.run(debug=True)
