@@ -254,7 +254,7 @@ def send_email(email, bills, current_year):
 def index():
 
     with app.app_context():
-        if collection.count() == 0:
+        if collection.count_documents({}) == 0:
             store_bills()
 
         retrieved_bills = list(collection.find())
