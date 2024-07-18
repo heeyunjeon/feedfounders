@@ -3,8 +3,8 @@ from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
-from scrapegraphai.graphs import SmartScraperGraph
-from scrapegraphai.utils import prettify_exec_info
+# from scrapegraphai.graphs import SmartScraperGraph
+# from scrapegraphai.utils import prettify_exec_info
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -15,10 +15,13 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 from datetime import datetime
 import os
 import json
+from pydantic import BaseModel
 
 import requests
 from bs4 import BeautifulSoup
 from openai import OpenAI
+
+import pymongo 
 
 # Load environment variables
 load_dotenv()  
@@ -27,6 +30,11 @@ load_dotenv()
 app = Flask(__name__)
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 cache.init_app(app)
+
+# Connect to MongoDB
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+db = client["mydatabase"]
+collection = db["bills"]
 
 # Configure the SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscriptions.db'
@@ -223,6 +231,10 @@ def fetch_bills():
         # Process and return the most recent policies
         return results
 
+def store_bills():
+    bills = fetch_bills()   
+    collection.insert_many(bills)
+
 def send_email(email, bills, current_year):
     with app.app_context():
         newsletter_content = render_template('index.html', bills=bills, current_year=current_year)
@@ -240,23 +252,21 @@ def send_email(email, bills, current_year):
 # Homepage displays the newsletter
 @app.route('/')
 def index():
-    global bills 
 
     with app.app_context():
-        bills = fetch_bills()
+        if collection.count() == 0:
+            store_bills()
+
+        retrieved_bills = list(collection.find())
 
         current_year = datetime.now().year
-        return render_template('index.html', bills=bills, current_year=current_year)
+        return render_template('index.html', bills=retrieved_bills, current_year=current_year)
 
 # Subscribe to the newsletter
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
-    global bills
     email = request.form.get('email')
-
-    if bills is None:
-        with app.app_context():
-            bills = fetch_bills()
+    retrieved_bills = list(collection.find())
 
     if email: 
         # Save the email to the database
@@ -267,7 +277,7 @@ def subscribe():
 
         # Send email with newsletter content
         current_year = datetime.now().year
-        send_email(email, bills, current_year)
+        send_email(email, retrieved_bills, current_year)
 
         # redirect to a thank you page
         return redirect(url_for('thank_you'))
