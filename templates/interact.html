@@ -1,71 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Feed Founders</title>
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .bills-container {
-        width: 80%;
-        margin-top: 20px;
-    }
-    .bill {
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-        background-color: #f9f9f9;
-    }
-    .chat-container {
-        width: 80%;
-        margin-top: 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        background-color: #f9f9f9;
-    }
-    .message {
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    .user-message {
-        background-color: #e2f7cb;
-    }
-    .bot-message {
-        background-color: #cfe2f3;
-    }
-</style>
+    <meta charset="UTF-8">
+    <title>Feed Founders</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-container {
+            width: 30%;
+            margin: 20px;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .policy {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }
+        .policy:last-child {
+            border-bottom: none;
+        }
+        .policy h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333333;
+        }
+        .policy p {
+            margin: 5px 0;
+            color: #666666;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 12px;
+            color: #999999;
+        }
+    </style>
 </head>
 <body>
-<div class="bills-container">
-    <div class="bill">
-        <img src="static/images/logo.png" alt="Logo">
+    <div class="container">
+        {% for bill in bills %}
+        <div class="bill">
+            <h2>{{ bill.name }}</h2>
+            <!-- <p><strong>Status:</strong> {{ bill.status }}</p>
+            <p><strong>Last Updated:</strong> {{ bill.last_updated }}</p> -->
+            <p><strong>Summary:</strong> {{ bill.summary }}</p>
+        </div>
+        {% endfor %}
+        <div class="footer">
+            <p>&copy; {{ current_year }} Feed Founders. All rights reserved.</p>
+        </div>
     </div>
-    {% for bill in bills %}
-    <div class="bill">
-        <h3>{{ bill.name }}</h3>
-        <p><strong>Summary:</strong> {{ bill.summary }}</p>
+    <div class="chat-container">
+        <h2>Chat Interface</h2>
+        <div id="chat-messages"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
     </div>
-    {% endfor %}
-</div>
-<div class="chat-container">
-    <div class="message user-message">
-        <strong>User:</strong> Hi, how are you doing?
-    </div>
-    <div class="message bot-message">
-        <strong>Bot:</strong> I'm doing well, thank you for asking.
-    </div>
-    <!-- Add more chat messages here -->
-</div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() !== '') {
+                appendMessage('user', userInput);
+                // You can add logic here to process the user input and generate bot responses
+                // For now, let's simulate a bot response after a short delay
+                setTimeout(() => {
+                    appendMessage('bot', 'This is a bot response.');
+                }, 1000);
+                document.getElementById('user-input').value = ''; // Clear the input field
+            }
+        }
+
+        function appendMessage(sender, message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender + '-message');
+            messageElement.innerHTML = `<strong>${sender.charAt(0).toUpperCase() + sender.slice(1)}:</strong> ${message}`;
+            chatMessages.appendChild(messageElement);
+        }
+    </script>
 </body>
 </html>
+
