@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bills and Chat Interface</title>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .bills-container {
+        width: 80%;
+        margin-top: 20px;
+    }
+    .bill {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f9f9f9;
+    }
+    .chat-container {
+        width: 80%;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #f9f9f9;
+    }
+    .message {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .user-message {
+        background-color: #e2f7cb;
+    }
+    .bot-message {
+        background-color: #cfe2f3;
+    }
+</style>
+</head>
+<body>
+<div class="bills-container">
+    <div class="bill">
+        <img src="static/images/logo.png" alt="Logo">
+    </div>
+    {% for bill in bills %}
+    <div class="bill">
+        <h3>{{ bill.name }}</h3>
+        <p><strong>Summary:</strong> {{ bill.summary }}</p>
+    </div>
+    {% endfor %}
+</div>
+<div class="chat-container">
+    <div class="message user-message">
+        <strong>User:</strong> Hi, how are you doing?
+    </div>
+    <div class="message bot-message">
+        <strong>Bot:</strong> I'm doing well, thank you for asking.
+    </div>
+    <!-- Add more chat messages here -->
+</div>
+</body>
+</html>

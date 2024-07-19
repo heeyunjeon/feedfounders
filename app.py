@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
@@ -82,24 +82,6 @@ def fetch_bills():
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--window-size=1189,813")
             driver = webdriver.Chrome(options=chrome_options)
-            # Path to your LOCAL WebDriver executable 
-            # CHROMEDRIVER_PATH = "/Users/lsat/.cursor-tutor/projects/feedfounder/feedfounders/bin/chromedriver" 
-            # GOOGLE_CHROME_BIN = "/Users/lsat/.cursor-tutor/projects/feedfounder/feedfounders/bin/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
-            # service = Service(CHROMEDRIVER_PATH)
-            # options = Options()
-            # options.headless = True
-            # driver = webdriver.Chrome(service=service, options=options)
-
-            # # Uncomment to use Heroku
-            # CHROMEDRIVER_PATH = "/app/.chrome-for-testing/chromedriver-linux64/chromedriver" 
-            # GOOGLE_CHROME_BIN = "/app/.chrome-for-testing/chrome-linux64/chrome"
-            
-            # chrome_options.add_argument("--headless") 
-            # Adjust window-size to match the size of the screen
-            # chrome_options.add_argument("--window-size=1189,813")
-            # chrome_options.add_argument('--disable-gpu')
-            # chrome_options.add_argument('--no-sandbox')
-            # chrome_options.binary_location = GOOGLE_CHROME_BIN
         
             # Open the URL
             url = "https://techpolicy.press/tracker/"
@@ -123,9 +105,7 @@ def fetch_bills():
                     raise
                 
             # Click the first button - "topics" 
-            # print("Clicking first filter element...")
             click('//*[@id="topics-button"]') 
-            # print("First filter element clicked.")
             
             # Debug screenshot if first button is clicked as expected
             # driver.get_screenshot_as_file("screenshot1.png")
@@ -217,7 +197,6 @@ def send_email(email, current_year):
 # Homepage displays the newsletter
 @app.route('/')
 def index():
-
     with app.app_context():
         retrieved_bills = Bill.query.limit(5).all()
 
@@ -241,12 +220,15 @@ def subscribe():
         send_email(email, current_year)
 
         # redirect to a thank you page
-        return redirect(url_for('thank_you'))
+        return redirect(url_for('chat'))
     return "Subscription failed", 400
 
-@app.route('/thank-you')
-def thank_you():
-    return render_template('thank_you.html')
+@app.route('/chat', methods=['GET'])
+def chat():
+     with app.app_context():
+        retrieved_bills = Bill.query.limit(5).all()
+
+        return render_template('chat.html', bills=retrieved_bills)
 
 if __name__ == '__main__':
     # Create the database  
