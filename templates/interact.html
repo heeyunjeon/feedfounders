@@ -10,9 +10,11 @@
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
+            display: flex;
+            justify-content: space-between;
         }
         .container {
-            width: 100%;
+            width: 70%;
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
@@ -21,10 +23,18 @@
         }
         .chat-container {
             width: 30%;
-            margin: 20px;
-            background-color: #ffffff;
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            background-color: #f9f9f9;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        .chat-container img {
+            height: 10px;
+            width: 10px;
         }
         .policy {
             border-bottom: 1px solid #e0e0e0;
@@ -65,7 +75,8 @@
         </div>
     </div>
     <div class="chat-container">
-        <h2>Chat Interface</h2>
+        <h2>Interact with Feed Founders</h2>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
         <div id="chat-messages"></div>
         <input type="text" id="user-input" placeholder="Type your message...">
         <button onclick="sendMessage()">Send</button>
