@@ -219,16 +219,16 @@ def subscribe():
         current_year = datetime.now().year
         send_email(email, current_year)
 
-        # redirect to a thank you page
-        return redirect(url_for('chat'))
+        # redirect to interact page
+        return redirect(url_for('interact'))
     return "Subscription failed", 400
 
-@app.route('/chat', methods=['GET'])
-def chat():
+@app.route('/interact', methods=['GET'])
+def interact():
      with app.app_context():
         retrieved_bills = Bill.query.limit(5).all()
 
-        return render_template('chat.html', bills=retrieved_bills)
+        return render_template('interact.html', bills=retrieved_bills)
 
 if __name__ == '__main__':
     # Create the database  
