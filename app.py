@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from datetime import datetime
 import os
-
+import json
 import requests
 from bs4 import BeautifulSoup
 from openai import OpenAI
@@ -70,6 +70,32 @@ graph_config = {
     "verbose": True,
     "headless": True,
 }
+
+def generate_answer(query, mode):
+    client = OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY")
+    )
+
+    if mode == "summarize":
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are an expert at summarizing, and identifying key points in text."},
+            {"role": "user", "content": "Summarize this text: ''' {} ''', making sure to capture only the key points and using only 3 sentences.".format(query)}
+        ]
+    )
+    
+    else: 
+        retrieved_bills = Bill.query.limit(5).all()
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You have a JD degrree from Yale law school and a PhD in Computer Science from MIT, and you are tasked with answering a question about the following bills: {}. What is the question? Answer the question based on the bill summaries.".format(retrieved_bills)},
+                {"role": "user", "content": "Answer the question based on the bill summaries: {}".format(query)}
+            ]
+        )
+
+    return completion.choices[0].message.content.strip()
 
 # Fetch bills from the TechPolicy Press website
 def fetch_bills():
@@ -138,31 +164,11 @@ def fetch_bills():
                     name = fullname.split("|")[0].strip()
                 
                     # Summarize
-                    client = OpenAI(
-                        api_key=os.environ.get("OPENAI_API_KEY")
-                    )
+                    summary = generate_answer(content, "summarize")
 
-                    completion = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[
-                            {"role": "system", "content": "You are an expert at summarizing, and identifying key points in text."},
-                            {"role": "user", "content": "Summarize this text: ''' {} ''', making sure to capture only the key points and using only 3 sentences.".format(content)}
-                        ]
-                    )
-
-                    # smart_scraper_graph = SmartScraperGraph(
-                    # prompt="Tell me the name, status, last updated, and summary of the bill.",
-                    # source=button_url,
-                    # config=graph_config
-                    # )
-
-                    # print(f"Extracted URL: {button_url}")
-                    # results.append(smart_scraper_graph.run())
-                    bill = Bill(name=name, summary=completion.choices[0].message.content.strip())
+                    bill = Bill(name=name, summary=summary)
                     db.session.add(bill)
                     
-                    # results.append({"name": name, "summary": completion.choices[0].message.content.strip()})
-
                 except TimeoutException:
                     print("Button URL not found. Printing page source for debugging.")
                     print(driver.page_source)
@@ -223,12 +229,23 @@ def subscribe():
         return redirect(url_for('interact'))
     return "Subscription failed", 400
 
+@app.route('/interact_json', methods=['POST'])
+def interact_json():
+    data = request.get_json()
+    user_message = data['message']
+    print(user_message)
+    bot_answer = generate_answer(user_message, "answer")
+    print(bot_answer)
+    
+    return jsonify(bot_answer)
+
 @app.route('/interact', methods=['GET'])
 def interact():
-     with app.app_context():
+    with app.app_context():
         retrieved_bills = Bill.query.limit(5).all()
 
         return render_template('interact.html', bills=retrieved_bills)
+
 
 if __name__ == '__main__':
     # Create the database  

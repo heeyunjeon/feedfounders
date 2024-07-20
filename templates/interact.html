@@ -21,8 +21,16 @@
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .header img {
+            height: 130px;
+            width: 130px;
+        }
         .chat-container {
-            width: 30%;
+            width: 25%;
             position: fixed;
             top: 0;
             right: 0;
@@ -31,10 +39,6 @@
             padding: 20px;
             box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
-        }
-        .chat-container img {
-            height: 10px;
-            width: 10px;
         }
         .policy {
             border-bottom: 1px solid #e0e0e0;
@@ -62,6 +66,9 @@
 </head>
 <body>
     <div class="container">
+        <div class="header">
+            <img src="static/images/logo.png" alt="Logo">
+        </div>
         {% for bill in bills %}
         <div class="bill">
             <h2>{{ bill.name }}</h2>
@@ -76,32 +83,47 @@
     </div>
     <div class="chat-container">
         <h2>Interact with Feed Founders</h2>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
         <div id="chat-messages"></div>
         <input type="text" id="user-input" placeholder="Type your message...">
         <button onclick="sendMessage()">Send</button>
     </div>
 
     <script>
-        function sendMessage() {
+        const sendMessage = async () => {
             const userInput = document.getElementById('user-input').value;
             if (userInput.trim() !== '') {
                 appendMessage('user', userInput);
-                // You can add logic here to process the user input and generate bot responses
-                // For now, let's simulate a bot response after a short delay
-                setTimeout(() => {
-                    appendMessage('bot', 'This is a bot response.');
-                }, 1000);
                 document.getElementById('user-input').value = ''; // Clear the input field
+
+                // Make an asynchronous request to the backend to get ChatGPT response
+                const response = await fetch('/interact_json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userInput })
+                });
+                const data = await response.json();
+                appendMessage('bot', data);
             }
         }
 
         function appendMessage(sender, message) {
             const chatMessages = document.getElementById('chat-messages');
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message-container');
+
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', sender + '-message');
             messageElement.innerHTML = `<strong>${sender.charAt(0).toUpperCase() + sender.slice(1)}:</strong> ${message}`;
-            chatMessages.appendChild(messageElement);
+            
+            messageContainer.appendChild(messageElement);
+            chatMessages.appendChild(messageContainer);
+             // Set a fixed height and enable overflow scrolling for the message container
+            messageContainer.style.maxHeight = '100px'; 
+            messageContainer.style.overflowY = 'auto';
+            messageContainer.style.scrollbarWidth = 'thick'; // Set the width of the scrollbar
+            messageContainer.style.scrollbarColor = '#888888 #f0f0f0'; // Set the color of the scrollbar
         }
     </script>
 </body>
