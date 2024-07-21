@@ -44,10 +44,11 @@ mail = Mail(app)
 
 # Define a model for storing email addresses
 class Subscription(db.Model):
+    __tablename__ = 'subscriptions'
     id = db.Column(db.Integer, primary_key=True)
     # Uncomment this line to make email unique
-    # email = db.Column(db.String(120), unique=True, nullable=False)
-    email = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    
 
 class Bill(db.Model):
     __tablename__ = 'bills'
