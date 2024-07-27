@@ -60,6 +60,9 @@ class Bill(db.Model):
     def __repr__(self):
         return f"Bill(id={self.id}, name={self.name}, summary={self.summary})"
 
+with app.app_context():
+    db.create_all()
+
 # OpenAI key for ScrapeGraphAI
 openai_key = os.getenv("OPENAI_APIKEY")
 
@@ -252,7 +255,7 @@ def interact():
 if __name__ == '__main__':
     # Create the database  
     with app.app_context():
-        db.create_all()
+        
         count = Bill.query.count()
         if count == 0:
             fetch_bills()
