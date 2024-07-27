@@ -222,7 +222,6 @@ def subscribe():
         new_subscription = Subscription(email=email)
         db.session.add(new_subscription)
         db.session.commit()
-        print(f"Received subscription request from: {email}")
 
         # Send email with newsletter content
         current_year = datetime.now().year
