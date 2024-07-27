@@ -251,6 +251,7 @@ def interact():
 
 
 if __name__ == '__main__':
+    db.create_all()
     # Create the database  
     with app.app_context():
         count = Bill.query.count()
