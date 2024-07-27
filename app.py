@@ -272,7 +272,6 @@ def interact():
 if __name__ == '__main__':
     # Create the database  
     with app.app_context():
-        
         count = Bill.query.count()
         if count == 0:
             fetch_bills()
