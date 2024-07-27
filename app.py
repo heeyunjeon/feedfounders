@@ -193,14 +193,14 @@ def send_email(email, current_year):
 
         # newsletter_content = render_template('index.html', bills=retrieved_bills, current_year=current_year)
 
-    # Create the email message
-    msg = Message('Thank you for your patience. feedfounders.com is now LIVE!', 
-                    recipients=[email],
-                    sender=app.config['MAIL_DEFAULT_SENDER'])
-    msg.html = newsletter_content
+        # Create the email message
+        msg = Message('Thank you for your patience. feedfounders.com is now LIVE!', 
+                        recipients=[email],
+                        sender=app.config['MAIL_DEFAULT_SENDER'])
+        msg.html = newsletter_content
 
-    # Send the email
-    mail.send(msg)
+        # Send the email
+        mail.send(msg)
 
 ###############FLASK##############
 # Homepage displays the newsletter
