@@ -189,10 +189,12 @@ def send_email(email, current_year):
     with app.app_context():
         # Get the bills from the database
         retrieved_bills = Bill.query.limit(5).all()
-        newsletter_content = render_template('index.html', bills=retrieved_bills, current_year=current_year)
+        newsletter_content = render_template('framer.html', bills=retrieved_bills, current_year=current_year)
+
+        # newsletter_content = render_template('index.html', bills=retrieved_bills, current_year=current_year)
 
     # Create the email message
-    msg = Message('Thank you for subscribing!', 
+    msg = Message('Thank you for your patience. feedfounders.com is now LIVE!', 
                     recipients=[email],
                     sender=app.config['MAIL_DEFAULT_SENDER'])
     msg.html = newsletter_content
