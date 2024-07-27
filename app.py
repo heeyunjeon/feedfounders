@@ -27,6 +27,7 @@ cache.init_app(app)
 # Configure the SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscriptions.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bills.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user_queries.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configure Flask-Mail
@@ -59,6 +60,19 @@ class Bill(db.Model):
 
     def __repr__(self):
         return f"Bill(id={self.id}, name={self.name}, summary={self.summary})"
+    
+# Add this code snippet to your existing app.py file
+
+class UserQuery(db.Model):
+    __tablename__ = 'user_queries'
+
+    id = db.Column(db.Integer, primary_key=True)
+    query_text = db.Column(db.Text, nullable=False)
+    # email = db.Column(db.String(120), nullable=False)
+
+
+    def __repr__(self):
+        return f"UserQuery(id={self.id}, query_text={self.query_text})"
 
 with app.app_context():
     db.create_all()
@@ -197,7 +211,7 @@ def send_email(email, current_year):
         # newsletter_content = render_template('index.html', bills=retrieved_bills, current_year=current_year)
 
         # Create the email message
-        msg = Message('Thank you for your patience. feedfounders.com is now LIVE!', 
+        msg = Message('Thank you for subscribing! Here are the latest ai regulations:', 
                         recipients=[email],
                         sender=app.config['MAIL_DEFAULT_SENDER'])
         msg.html = newsletter_content
@@ -238,6 +252,9 @@ def subscribe():
 def interact_json():
     data = request.get_json()
     user_message = data['message']
+    new_query = UserQuery(query_text=user_message)
+    db.session.add(new_query)
+    db.session.commit()
     print(user_message)
     bot_answer = generate_answer(user_message, "answer")
     print(bot_answer)
