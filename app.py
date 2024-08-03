@@ -4,22 +4,22 @@ from datetime import datetime
 
 # Third-Party Imports
 from flask import Flask, render_template, redirect, url_for, request, jsonify
-from flask_caching import Cache
-from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
+# from flask_caching import Cache
+
+from flask_mail import Mail, Message
 from dotenv import load_dotenv
 
 # Local Imports
-from models import Bill, Subscription, UserQuery
-from utils import generate_answer, fetch_bills, send_email
+from utils import *
+from models import db, init_app
 
 # Load environment variables
 load_dotenv()  
 
 # Initialize Flask app
 app = Flask(__name__)
-cache = Cache(config={'CACHE_TYPE': 'simple'})
-cache.init_app(app)
+# cache = Cache(config={'CACHE_TYPE': 'simple'})
+# cache.init_app(app)
 
 # Configure the SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscriptions.db'
@@ -37,8 +37,8 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 mail = Mail(app) 
 
-# Initialize the database
-db = SQLAlchemy(app)
+init_app(app)
+
 with app.app_context():
     db.create_all()
 
@@ -59,7 +59,7 @@ graph_config = {
 def index():
     # Homepage displays the newsletter
     with app.app_context():
-        retrieved_bills = Bill.query.limit(5).all()
+        retrieved_bills = get_bills()
         current_year = datetime.now().year
         return render_template('index.html', bills=retrieved_bills, current_year=current_year)
 
@@ -68,14 +68,19 @@ def subscribe():
     # Subscribe to the newsletter
     email = request.form.get('email')
     if email: 
-        # Save the email to the database
-        new_subscription = Subscription(email=email)
-        db.session.add(new_subscription)
-        db.session.commit()
-
+        save_email(email, db)
         # Send email with newsletter content
         current_year = datetime.now().year
-        send_email(email, current_year)
+        with app.app_context():
+            content = generate_email(current_year)
+
+            msg = Message('Thank you for subscribing! Here are the latest ai regulations:', 
+                            recipients=[email],
+                            sender=app.config['MAIL_DEFAULT_SENDER'])
+            msg.html = content
+
+            # Send the email
+            mail.send(msg)
 
         # redirect to interact page
         return redirect(url_for('interact'))
@@ -86,26 +91,26 @@ def interact_json():
     # Handle JSON interactions
     data = request.get_json()
     user_message = data['message']
-    new_query = UserQuery(query_text=user_message)
-    db.session.add(new_query)
-    db.session.commit()
+    save_usermsg(user_message, db)
+
     print(user_message)
     bot_answer = generate_answer(user_message, "answer")
     print(bot_answer)
+
     return jsonify(bot_answer)
 
 @app.route('/interact', methods=['GET'])
 def interact():
     # Interact route
     with app.app_context():
-        retrieved_bills = Bill.query.limit(5).all()
+        retrieved_bills = get_bills()
         return render_template('interact.html', bills=retrieved_bills)
 
 if __name__ == '__main__':
     # Initialize database  
     with app.app_context():
-        count = Bill.query.count()
+        count = count_bills()
         if count == 0:
-            fetch_bills()
+            fetch_bills(db)
     
     app.run(debug=True)
