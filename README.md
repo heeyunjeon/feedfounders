@@ -1,2 +1,0 @@
-# feedfounders
-Python Webscraping Project
