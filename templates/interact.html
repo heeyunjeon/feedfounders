@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feed Founders</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: space-between;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .header img {
+            height: 130px;
+            width: 130px;
+        }
+        .chat-container {
+            width: 25%;
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            background-color: #f9f9f9;
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        .policy {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }
+        .policy:last-child {
+            border-bottom: none;
+        }
+        .policy h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333333;
+        }
+        .policy p {
+            margin: 5px 0;
+            color: #666666;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 12px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="static/images/logo.png" alt="Logo">
+        </div>
+        {% for bill in bills %}
+        <div class="bill">
+            <h2>{{ bill.name }}</h2>
+            <!-- <p><strong>Status:</strong> {{ bill.status }}</p>
+            <p><strong>Last Updated:</strong> {{ bill.last_updated }}</p> -->
+            <p><strong>Summary:</strong> {{ bill.summary }}</p>
+        </div>
+        {% endfor %}
+        <div class="footer">
+            <p>&copy; {{ current_year }} Feed Founders. All rights reserved.</p>
+        </div>
+    </div>
+    <div class="chat-container">
+        <h2>Interact with Feed Founders</h2>
+        <div id="chat-messages"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const sendMessage = async () => {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() !== '') {
+                appendMessage('user', userInput);
+                document.getElementById('user-input').value = ''; // Clear the input field
+
+                // Make an asynchronous request to the backend to get ChatGPT response
+                const response = await fetch('/interact_json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userInput })
+                });
+                const data = await response.json();
+                appendMessage('FF', data);
+            }
+        }
+
+        function appendMessage(sender, message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message-container');
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender + '-message');
+            messageElement.innerHTML = `<strong>${sender.charAt(0).toUpperCase() + sender.slice(1)}:</strong> ${message}`;
+            
+            messageContainer.appendChild(messageElement);
+            chatMessages.appendChild(messageContainer);
+             // Set a fixed height and enable overflow scrolling for the message container
+            messageContainer.style.maxHeight = '100px'; 
+            messageContainer.style.overflowY = 'auto';
+            messageContainer.style.scrollbarWidth = 'thick'; // Set the width of the scrollbar
+            messageContainer.style.scrollbarColor = '#888888 #f0f0f0'; // Set the color of the scrollbar
+        }
+    </script>
+</body>
+</html>
+

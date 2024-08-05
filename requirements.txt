@@ -1,0 +1,11 @@
+django>=5.0,<5.1
+dj-database-url>=2,<3
+Flask>=2.2.5
+Flask-Caching==1.10.1
+Flask-SQLAlchemy>=3.0.2
+Flask-Mail==0.9.1
+gunicorn>=22,<23
+python-dotenv==1.0.1
+rq>=0.13
+scrapegraphai==0.1.0
+selenium==3.141.0
