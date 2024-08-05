@@ -2,14 +2,14 @@
 
 # [feedfounders.com](https://feedfounders.com)
 
-## 👀 What is this?
+## What is this?
 
 Newsfeed to help startup founders stay up-to-date on AI regulations. 
 
 ## Key Features
 
 - 📩 **You've Got Mail!**: Subscribe to receive our updated feed in your inbox.
-- 💬 **Chat with Collections**: Interact directly with our feed.
+- 💬 **Chat with our feed**: Interact directly with our feed.
 
 ## How do I use this?
 
