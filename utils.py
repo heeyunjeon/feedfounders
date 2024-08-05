@@ -1,4 +1,6 @@
+# db access
 from models import Bill, Subscription, UserQuery
+
 # generate_answer
 from openai import OpenAI
 import os 
@@ -53,7 +55,7 @@ def fetch_bills(db):
         driver = webdriver.Chrome(options=chrome_options)
     
         # Open the URL
-        url = "https://techpolicy.press/tracker/"
+        url = os.environ.get("SCRAPE_URL")
         driver.get(url)
 
         # Function to click an element with retry on StaleElementReferenceException
