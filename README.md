@@ -1,4 +1,2 @@
-# feed founders.
-
-Python Webscraping Project
-<img src="https://github.com/heeyunjeon/feedfounders/blob/main/static/images/logo.png" alt="Image Alt Text" width="100"/>
+<h1># feed founders.</h1>
+<img src="https://github.com/heeyunjeon/feedfounders/blob/main/static/images/logo.png" alt="Logo" width="100"/>
