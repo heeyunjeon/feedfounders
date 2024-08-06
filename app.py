@@ -4,8 +4,6 @@ from datetime import datetime
 
 # Third-Party Imports
 from flask import Flask, render_template, redirect, url_for, request, jsonify
-# from flask_caching import Cache
-
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
 
@@ -18,8 +16,6 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-# cache = Cache(config={'CACHE_TYPE': 'simple'})
-# cache.init_app(app)
 
 # Configure the SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscriptions.db'
@@ -91,11 +87,12 @@ def interact_json():
     # Handle JSON interactions
     data = request.get_json()
     user_message = data['message']
+
+    # add to user_query 
     save_usermsg(user_message, db)
 
-    print(user_message)
+    # generate answer
     bot_answer = generate_answer(user_message, "answer")
-    print(bot_answer)
 
     return jsonify(bot_answer)
 
